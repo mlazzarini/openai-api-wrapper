@@ -3,27 +3,29 @@ import { useState } from "react";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
-  const [result, setResult] = useState();
+  const [prompt, setPrompt] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [downloadUrl, setDonwloadUrl] = useState();
 
   async function onSubmit(event) {
     event.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ animal: animalInput }),
+        body: JSON.stringify({ prompt }),
       });
 
       const data = await response.json();
       if (response.status !== 200) {
         throw data.error || new Error(`Request failed with status ${response.status}`);
       }
-
-      setResult(data.result);
-      setAnimalInput("");
+      setLoading(false)
+      setResults(oldResults => [...oldResults, data.result]);
     } catch(error) {
       // Consider implementing your own error handling logic here
       console.error(error);
@@ -31,26 +33,37 @@ export default function Home() {
     }
   }
 
+  const onDownload = () => {
+    const stringResults = JSON.stringify(results);
+    const blob = new Blob([stringResults], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    setDonwloadUrl(url)
+  };
+
   return (
     <div>
       <Head>
-        <title>OpenAI Quickstart</title>
-        <link rel="icon" href="/dog.png" />
+        <title>OpenAI Wrapper</title>
       </Head>
 
       <main className={styles.main}>
         <h3>Enter a prompt</h3>
         <form onSubmit={onSubmit}>
-          <input
+          <textarea
             type="text"
-            name="animal"
+            name="prompt"
             placeholder="Enter a prompt"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
           />
-          <input type="submit" value="Generate names" />
+          <input type="submit" value="Generate result" />
         </form>
-        <div className={styles.result}>{result}</div>
+        {results.map((result) =>
+          <div className={styles.result}>{result}</div>
+        )}
+        {loading && <span>Loading.......</span>}
+        <button onClick={onDownload}>Generate download</button>
+        {downloadUrl && <a href={downloadUrl} download>Download results</a>}
       </main>
     </div>
   );
