@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useState } from "react";
 import styles from "./index.module.css";
+import { formatFileOutput } from "../utils/formatFileOutput";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
@@ -35,8 +36,8 @@ export default function Home() {
   }
 
   const onDownload = () => {
-    const stringResults = JSON.stringify(results);
-    const blob = new Blob([stringResults], { type: "text/plain" });
+    const formattedResults = formatFileOutput(results)
+    const blob = new Blob([formattedResults], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     setDonwloadUrl(url)
   };
