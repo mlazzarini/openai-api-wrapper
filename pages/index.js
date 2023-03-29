@@ -11,6 +11,7 @@ export default function Home() {
   async function onSubmit(event) {
     event.preventDefault();
     setLoading(true);
+    setDonwloadUrl();
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
@@ -61,9 +62,9 @@ export default function Home() {
         {results.map((result) =>
           <div className={styles.result}>{result}</div>
         )}
-        {loading && <span>Loading.......</span>}
-        <button onClick={onDownload}>Generate download</button>
-        {downloadUrl && <a href={downloadUrl} download>Download results</a>}
+        {loading && <span className={styles.loading}>Loading.......</span>}
+        <button className={styles.generate} onClick={onDownload}>Generate download</button>
+        {downloadUrl && <a className={styles.download} href={downloadUrl} download>Download results</a>}
       </main>
     </div>
   );
